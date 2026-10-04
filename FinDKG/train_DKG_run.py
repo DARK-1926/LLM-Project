@@ -55,7 +55,7 @@ INTER_EVENT_TIME_DTYPE = torch.float32
 
 
 ############################### Config ############################### 
-graph_mode = "FinDKG-full"   # specify the dataset: "FinDKG-full" "FinDKG" "ICEWS18"  #"ICEWS14"  #"ICEWS_500"  #"GDELT"  #"WIKI"  #"YAGO"
+graph_mode = "FinDKG"   # specify the dataset: "FinDKG-full" "FinDKG" "ICEWS18"  #"ICEWS14"  #"ICEWS_500"  #"GDELT"  #"WIKI"  #"YAGO"
 
 model_ver = "KGTransformer"   # Mode name: "GraphTransformer"
 model_type ='KGT+RNN'  # 'KGT+RNN' for GraphTransformer | 'RGCN+RNN' for GraphRNN
@@ -96,7 +96,6 @@ args.num_gconv_layers = 2   # layer of the KGTransformer, default set up 2
 
 args.num_attn_heads = 8
 args.lr = 0.0005  # leanrning rate
-args.rnn_truncate_every = 8  # Increased from 2 for better temporal learning
 args.patience = 20  # Increased from 10 to allow longer training
 
 # Freeze the random seed
