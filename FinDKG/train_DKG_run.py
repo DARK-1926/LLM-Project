@@ -113,6 +113,7 @@ print(log_root_path)
 overall_best_checkpoint_prefix = f"{args.graph}_{args.version}_overall_best_checkpoint"
 run_best_checkpoint_prefix = f"{args.graph}_{args.version}_run_best_checkpoint"
     
+os.makedirs(log_root_path, exist_ok=True)
 with open(os.path.join(log_root_path, f"{args.graph}_args_{args.version}.txt"), 'w') as f:
     f.write(pprint.pformat(args.__dict__))
 
