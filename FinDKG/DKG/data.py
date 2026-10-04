@@ -42,7 +42,7 @@ def load_temporal_knowledge_graph(graph_name, idtype=settings.DGL_GRAPH_ID_TYPE,
     G.edata['rel_type'] = rels.type(idtype)
 
     # add Node type data as knowledge entity category
-    if graph_name in ['FinDKG', 'FinDKG-live']:
+    if graph_name in ['FinDKG', 'FinDKG-full', 'FinDKG-live']:
         G.num_node_types = 12
         print(" --> Load the entity type data for FinDKG")
         node_data_table = load_data_table(graph_name, "entity2id.txt",

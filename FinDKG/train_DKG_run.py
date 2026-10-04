@@ -55,7 +55,7 @@ INTER_EVENT_TIME_DTYPE = torch.float32
 
 
 ############################### Config ############################### 
-graph_mode = "FinDKG"   # specify the dataset: "FinDKG" "ICEWS18"  #"ICEWS14"  #"ICEWS_500"  #"GDELT"  #"WIKI"  #"YAGO"
+graph_mode = "FinDKG-full"   # specify the dataset: "FinDKG-full" "FinDKG" "ICEWS18"  #"ICEWS14"  #"ICEWS_500"  #"GDELT"  #"WIKI"  #"YAGO"
 
 model_ver = "KGTransformer"   # Mode name: "GraphTransformer"
 model_type ='KGT+RNN'  # 'KGT+RNN' for GraphTransformer | 'RGCN+RNN' for GraphRNN
