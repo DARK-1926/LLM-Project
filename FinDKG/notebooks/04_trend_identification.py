@@ -13,6 +13,8 @@ import os
 import pandas as pd
 import networkx as nx
 import numpy as np
+import os
+os.environ.pop('MPLBACKEND', None)  # Prevent Kaggle inline backend clash
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt

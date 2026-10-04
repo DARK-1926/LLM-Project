@@ -96,6 +96,7 @@ args.num_gconv_layers = 2   # layer of the KGTransformer, default set up 2
 
 args.num_attn_heads = 8
 args.lr = 0.0005  # leanrning rate
+args.rnn_truncate_every = 40  # Safely below the 55-batch memory limit of Kaggle's 15GB GPU
 args.patience = 20  # Increased from 10 to allow longer training
 
 # Freeze the random seed

@@ -23,7 +23,7 @@ if not API_KEY:
     exit(1)
 
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = genai.GenerativeModel('gemini-2.5-flash')
 
 # ── Prompt Template ─────────────────────────────────────────────────
 # This prompt mirrors the instructions provided to the LLM in the FinDKG paper
