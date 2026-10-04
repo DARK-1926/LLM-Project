@@ -9,6 +9,8 @@ import os
 import sys
 import pprint
 
+os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
+
 import pandas as pd
 import numpy as np
 
@@ -94,7 +96,8 @@ args.num_gconv_layers = 2   # layer of the KGTransformer, default set up 2
 
 args.num_attn_heads = 8
 args.lr = 0.0005  # leanrning rate
-args.rnn_truncate_every = 2  # prevent CUDA OOM on Kaggle 15GB T4 GPUs
+args.rnn_truncate_every = 8  # Increased from 2 for better temporal learning
+args.patience = 20  # Increased from 10 to allow longer training
 
 # Freeze the random seed
 np.random.seed(args.seed)
