@@ -94,6 +94,7 @@ args.num_gconv_layers = 2   # layer of the KGTransformer, default set up 2
 
 args.num_attn_heads = 8
 args.lr = 0.0005  # leanrning rate
+args.rnn_truncate_every = 2  # prevent CUDA OOM on Kaggle 15GB T4 GPUs
 
 # Freeze the random seed
 np.random.seed(args.seed)
