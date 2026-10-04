@@ -145,11 +145,11 @@ class EmbeddingUpdater(nn.Module):
         updated_structural = dynamic_entity_emb.structural
         if batch_structural_dynamic_entity_emb is not None:
             updated_structural = dynamic_entity_emb.structural.clone()
-            updated_structural[batch_G.ndata[dgl.NID][batch_node_indices].long()] = batch_structural_dynamic_entity_emb.cpu()
+            updated_structural[batch_G.ndata[dgl.NID][batch_node_indices].cpu().long()] = batch_structural_dynamic_entity_emb.cpu()
         updated_temporal = dynamic_entity_emb.temporal
         if batch_temporal_dynamic_entity_emb is not None:
             updated_temporal = dynamic_entity_emb.temporal.clone()
-            updated_temporal[batch_G.ndata[dgl.NID][batch_node_indices].long()] = batch_temporal_dynamic_entity_emb.cpu()
+            updated_temporal[batch_G.ndata[dgl.NID][batch_node_indices].cpu().long()] = batch_temporal_dynamic_entity_emb.cpu()
         updated_dynamic_entity_emb = MultiAspectEmbedding(structural=updated_structural, temporal=updated_temporal)
 
         # Update the dynamic relation embeddings
@@ -219,7 +219,7 @@ class GraphStructuralRNNConv(nn.Module):
             batch_node_indices = batch_G.nodes().long()  # update embeddings of all nodes in batch_G
 
         """Structural RNN input"""
-        batch_structural_static_entity_emb = static_entity_emb.structural[batch_G.ndata[dgl.NID].long()].to(device)
+        batch_structural_static_entity_emb = static_entity_emb.structural[batch_G.ndata[dgl.NID].cpu().long()].to(device)
         if isinstance(self.graph_conv, RGCN):
             edge_norm = node_norm_to_edge_norm(batch_G)
             conv_structural_static_emb = self.graph_conv(batch_G, batch_structural_static_entity_emb, batch_G.edata['rel_type'].long(), edge_norm)
@@ -238,11 +238,11 @@ class GraphStructuralRNNConv(nn.Module):
             conv_structural_static_emb[batch_node_indices],
         ]
         if self.add_entity_emb:
-            structural_rnn_input.append(static_entity_emb.structural[batch_G.ndata[dgl.NID][batch_node_indices].long()].to(device))
+            structural_rnn_input.append(static_entity_emb.structural[batch_G.ndata[dgl.NID][batch_node_indices].cpu().long()].to(device))
         structural_rnn_input = torch.cat(structural_rnn_input, dim=1).unsqueeze(1)
 
         # Update structural dynamics
-        structural_dynamic = dynamic_entity_emb.structural[batch_G.ndata[dgl.NID][batch_node_indices].long()]
+        structural_dynamic = dynamic_entity_emb.structural[batch_G.ndata[dgl.NID][batch_node_indices].cpu().long()]
         structural_dynamic = structural_dynamic.to(device)
 
         output, hn = self.rnn_structural(structural_rnn_input, structural_dynamic.transpose(0, 1).contiguous())  # transpose to make shape to be (num_layers, batch, hidden_size)
@@ -315,7 +315,7 @@ class GraphTemporalRNNConv(nn.Module):
         EventTimeHelper.get_inter_event_times(rev_batch_G, self.node_latest_event_time[..., 1], update_latest_event_time=True)
 
         """Temporal RNN input"""
-        batch_temporal_static_entity_emb = static_entity_emb.temporal[batch_G.ndata[dgl.NID].long()].to(device)
+        batch_temporal_static_entity_emb = static_entity_emb.temporal[batch_G.ndata[dgl.NID].cpu().long()].to(device)
         edge_norm = (1 / self.time_interval_transform(batch_G_sparse_inter_event_times).clamp(min=1e-10)).clamp(max=10.0)
         
         # Encoding dimension
@@ -336,7 +336,7 @@ class GraphTemporalRNNConv(nn.Module):
             batch_G_conv_temporal_static_emb,
         ], dim=1)[batch_node_indices].unsqueeze(1)
 
-        rev_batch_temporal_static_entity_emb = static_entity_emb.temporal[rev_batch_G.ndata[dgl.NID].long()].to(device)
+        rev_batch_temporal_static_entity_emb = static_entity_emb.temporal[rev_batch_G.ndata[dgl.NID].cpu().long()].to(device)
         rev_edge_norm = (1 / self.time_interval_transform(rev_batch_G_sparse_inter_event_times).clamp(min=1e-10)).clamp(max=10.0)
 
         # Encoding node dimension
@@ -354,7 +354,7 @@ class GraphTemporalRNNConv(nn.Module):
             rev_batch_G_conv_temporal_static_emb,
         ], dim=1)[batch_node_indices].unsqueeze(1)
 
-        temporal_dynamic = dynamic_entity_emb.temporal[batch_G.ndata[dgl.NID][batch_node_indices].long()].to(device)
+        temporal_dynamic = dynamic_entity_emb.temporal[batch_G.ndata[dgl.NID][batch_node_indices].cpu().long()].to(device)
         temporal_dynamic_batch_G = temporal_dynamic[..., 0]  # dynamics as a recipient
         temporal_dynamic_rev_batch_G = temporal_dynamic[..., 1]  # dynamics as a sender
 
@@ -394,10 +394,10 @@ class RelationRNN(nn.Module):
 
         # aggregate entity embeddings by relation. transpose() is necessary to aggregate entity emb matrix row-wise.
         batch_G_src_emb_avg_by_rel_ = \
-            scatter_mean(static_entity_emb[batch_G_src_nid].to(device).transpose(0, 1),
+            scatter_mean(static_entity_emb[batch_G_src_nid.cpu()].to(device).transpose(0, 1),
                          batch_G_rel).transpose(0, 1)  # shape=(max rel in batch_G, static entity emb dim)
         batch_G_dst_emb_avg_by_rel_ = \
-            scatter_mean(static_entity_emb[batch_G_dst_nid].to(device).transpose(0, 1),
+            scatter_mean(static_entity_emb[batch_G_dst_nid.cpu()].to(device).transpose(0, 1),
                          batch_G_rel).transpose(0, 1)  # shape=(max rel in batch_G, static entity emb dim)
 
         # filter out relations that are non-existent in batch_G

@@ -407,8 +407,8 @@ def compute_loss(model, loss, batch_G, static_entity_emb, dynamic_entity_emb, dy
     """Edge loss"""
     if loss in ['edge', 'both']:
         # Get the static and dynamic entity embeddings for the subgraph.
-        sub_batch_G_structural_static_entity_emb = static_entity_emb.structural[sub_batch_G.ndata[dgl.NID].long()].to(args.device)
-        sub_batch_G_structural_dynamic_entity_emb = dynamic_entity_emb.structural[sub_batch_G.ndata[dgl.NID].long()][:, -1, :].to(args.device)  # [:, -1, :] to retrieve last hidden from rnn
+        sub_batch_G_structural_static_entity_emb = static_entity_emb.structural[sub_batch_G.ndata[dgl.NID].cpu().long()].to(args.device)
+        sub_batch_G_structural_dynamic_entity_emb = dynamic_entity_emb.structural[sub_batch_G.ndata[dgl.NID].cpu().long()][:, -1, :].to(args.device)  # [:, -1, :] to retrieve last hidden from rnn
 
         # Combine the static and dynamic entity embeddings for the subgraph.
         sub_batch_G_combined_emb = model.combiner(sub_batch_G_structural_static_entity_emb,
@@ -428,8 +428,8 @@ def compute_loss(model, loss, batch_G, static_entity_emb, dynamic_entity_emb, dy
     """Inter-event time loss"""
     if loss in ['time', 'both']:
         # Get the static and dynamic entity embeddings for the subgraph.
-        sub_batch_G_temporal_static_entity_emb = static_entity_emb.temporal[sub_batch_G.ndata[dgl.NID].long()].to(args.device)
-        sub_batch_G_temporal_dynamic_entity_emb = dynamic_entity_emb.temporal[sub_batch_G.ndata[dgl.NID].long()][:, -1, :, :].to(args.device)  # [:, -1, :, :] to retrieve last hidden from rnn
+        sub_batch_G_temporal_static_entity_emb = static_entity_emb.temporal[sub_batch_G.ndata[dgl.NID].cpu().long()].to(args.device)
+        sub_batch_G_temporal_dynamic_entity_emb = dynamic_entity_emb.temporal[sub_batch_G.ndata[dgl.NID].cpu().long()][:, -1, :, :].to(args.device)  # [:, -1, :, :] to retrieve last hidden from rnn
 
         # Get the dynamic relation embeddings for the subgraph.
         temporal_dynamic_relation_emb = dynamic_relation_emb.temporal[:, -1, :, :].to(args.device)  # [:, -1, :, :] to retrieve last hidden from rnn
@@ -483,7 +483,7 @@ def compute_loss_static(model, batch_G, static_entity_emb, args, batch_eid=None)
     loss_dict = {}
 
     # Get the static entity embeddings for the subgraph.
-    sub_batch_G_static_entity_emb = static_entity_emb[sub_batch_G.ndata[dgl.NID].long()].to(args.device)
+    sub_batch_G_static_entity_emb = static_entity_emb[sub_batch_G.ndata[dgl.NID].cpu().long()].to(args.device)
 
     # Compute the edge loss for the subgraph.
     edge_LL = model.edge_model(sub_batch_G, sub_batch_G_static_entity_emb, eid=batch_eid)
