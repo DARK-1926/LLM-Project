@@ -430,19 +430,19 @@ class EventTimeHelper:
     @classmethod
     def get_sparse_latest_event_times(cls, batch_G, node_latest_event_time, _global=False):
         batch_G_nid = batch_G.ndata[dgl.NID].long()
-        batch_latest_event_time = node_latest_event_time[batch_G_nid]
+        batch_latest_event_time = node_latest_event_time[batch_G_nid.cpu()]
 
         batch_G_src, batch_G_dst = batch_G.edges()
         device = batch_G.ndata[dgl.NID].device
         if _global:
-            return batch_latest_event_time[batch_G_dst.long(), -1].to(device)
+            return batch_latest_event_time[batch_G_dst.cpu().long(), -1].to(device)
         else:
-            return batch_latest_event_time[batch_G_dst.long(), batch_G_nid[batch_G_src.long()]].to(device)
+            return batch_latest_event_time[batch_G_dst.cpu().long(), batch_G_nid.cpu()[batch_G_src.cpu().long()]].to(device)
 
     @classmethod
     def get_inter_event_times(cls, batch_G, node_latest_event_time, update_latest_event_time=True):
         batch_G_nid = batch_G.ndata[dgl.NID].long()
-        batch_latest_event_time = node_latest_event_time[batch_G_nid]
+        batch_latest_event_time = node_latest_event_time[batch_G_nid.cpu()]
 
         batch_G_src, batch_G_dst = batch_G.edges()
         batch_G_src, batch_G_dst = batch_G_src.long(), batch_G_dst.long()
@@ -452,7 +452,7 @@ class EventTimeHelper:
         device = batch_G.ndata[dgl.NID].device
         batch_inter_event_times = torch.zeros(batch_G.num_nodes(), batch_G.num_all_nodes + 1, dtype=settings.INTER_EVENT_TIME_DTYPE).to(device)
         batch_inter_event_times[batch_G_dst, batch_G_nid[batch_G_src]] = \
-            batch_G_time - batch_latest_event_time[batch_G_dst, batch_G_nid[batch_G_src]].to(device)
+            batch_G_time - batch_latest_event_time[batch_G_dst.cpu(), batch_G_nid.cpu()[batch_G_src.cpu()]].to(device)
 
         batch_G.update_all(fn.copy_e('time', 't'), fn.max('t', 'max_event_time'))
         batch_G_max_event_time = batch_G.ndata['max_event_time'].to(settings.INTER_EVENT_TIME_DTYPE)
@@ -462,8 +462,8 @@ class EventTimeHelper:
         batch_inter_event_times[:, -1] = batch_G_max_event_time - batch_max_latest_event_time
 
         if update_latest_event_time:
-            node_latest_event_time[batch_G_nid[batch_G_dst], batch_G_nid[batch_G_src]] = batch_G_time.cpu()
-            node_latest_event_time[batch_G_nid, -1] = batch_G_max_event_time.cpu()
+            node_latest_event_time[batch_G_nid.cpu()[batch_G_dst.cpu()], batch_G_nid.cpu()[batch_G_src.cpu()]] = batch_G_time.cpu()
+            node_latest_event_time[batch_G_nid.cpu(), -1] = batch_G_max_event_time.cpu()
 
         return batch_inter_event_times
 
