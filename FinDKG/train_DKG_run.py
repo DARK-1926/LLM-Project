@@ -77,6 +77,7 @@ test_data_loader = DataLoader(G.test_times, shuffle=False, collate_fn=collate_fn
 ############################### Model Config ###############################
 args = deepcopy(DKG_DEFAULT_CONFIG)
 
+args.gpu = 0  # Force GPU usage
 args.seed = random_seed  # Random Seed 
 args.cuda = args.gpu >= 0 and torch.cuda.is_available()
 args.device = torch.device("cuda:{}".format(args.gpu) if args.cuda else "cpu")  
