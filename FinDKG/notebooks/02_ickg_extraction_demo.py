@@ -14,11 +14,11 @@ import os
 import google.generativeai as genai
 
 # ── Configuration ───────────────────────────────────────────────────
-# TODO: Insert your Gemini API key here before running
-API_KEY = "YOUR_GEMINI_API_KEY" 
+API_KEY = os.environ.get("GEMINI_API_KEY")
 
-if API_KEY == "YOUR_GEMINI_API_KEY":
-    print("⚠️ Please edit this file and insert your Gemini API key to run the demo.")
+if not API_KEY:
+    print("⚠️ Please set the GEMINI_API_KEY environment variable to run the demo.")
+    print("Example: export GEMINI_API_KEY='your_key_here'")
     print("Exiting...")
     exit(1)
 
