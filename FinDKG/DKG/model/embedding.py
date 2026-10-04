@@ -159,11 +159,11 @@ class EmbeddingUpdater(nn.Module):
         updated_structural = dynamic_relation_emb.structural
         if batch_structural_dynamic_relation_emb is not None:
             updated_structural = dynamic_relation_emb.structural.clone()
-            updated_structural[batch_G_uniq_rel] = batch_structural_dynamic_relation_emb.cpu()
+            updated_structural[batch_G_uniq_rel.cpu()] = batch_structural_dynamic_relation_emb.cpu()
         updated_temporal = dynamic_relation_emb.temporal
         if batch_temporal_dynamic_relation_emb is not None:
             updated_temporal = dynamic_relation_emb.temporal.clone()
-            updated_temporal[batch_G_uniq_rel] = batch_temporal_dynamic_relation_emb.cpu()
+            updated_temporal[batch_G_uniq_rel.cpu()] = batch_temporal_dynamic_relation_emb.cpu()
 
         updated_dynamic_relation_emb = MultiAspectEmbedding(structural=updated_structural, temporal=updated_temporal)
 
@@ -405,7 +405,7 @@ class RelationRNN(nn.Module):
         batch_G_src_emb_avg_by_rel = batch_G_src_emb_avg_by_rel_[batch_G_uniq_rel]  # shape=(# uniq rels in batch_G, static entity emb dim)
         batch_G_dst_emb_avg_by_rel = batch_G_dst_emb_avg_by_rel_[batch_G_uniq_rel]  # shape=(# uniq rels in batch_G, static entity emb dim)
 
-        batch_G_dynamic_relation_emb = dynamic_relation_emb[batch_G_uniq_rel]
+        batch_G_dynamic_relation_emb = dynamic_relation_emb[batch_G_uniq_rel.cpu()]
         batch_G_src_dynamic_relation_emb = batch_G_dynamic_relation_emb[..., 0].to(device)
         batch_G_dst_dynamic_relation_emb = batch_G_dynamic_relation_emb[..., 1].to(device)
 
