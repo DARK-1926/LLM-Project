@@ -1,6 +1,6 @@
 #!/bin/bash
-# Navigate to the folder (assuming we are in /kaggle/working/LLM-Project)
-cd FinDKG
+# Navigate to the folder (assuming we are in /kaggle/working)
+cd LLM-Project/FinDKG
 
 # 1. Create a fresh Python 3.10 environment
 conda create -n findkg_env python=3.10 -y
