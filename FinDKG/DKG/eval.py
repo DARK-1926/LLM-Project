@@ -190,8 +190,8 @@ def eval_link_prediction(model: DynamicGraphModel, batch_G, cumul_G, entire_G, s
             """Compute edge likelihood"""
             edges_target_entity_log_prob = torch.empty(len(eval_eid), entire_G.num_nodes()).fill_(-1e20).cpu()  # shape: (# edges in cumul_G & belonging to eval_times, # nodes in the entire graph)
             if args.eval in ['edge', 'both']:
-                cumul_G_structural_static_emb = static_entity_emb.structural[cumul_G.ndata[dgl.NID].long()].to(args.device)
-                cumul_G_structural_dynamic_emb = dynamic_entity_emb.structural[cumul_G.ndata[dgl.NID].long()][:, -1, :].to(args.device)
+                cumul_G_structural_static_emb = static_entity_emb.structural[cumul_G.ndata[dgl.NID].cpu().long()].to(args.device)
+                cumul_G_structural_dynamic_emb = dynamic_entity_emb.structural[cumul_G.ndata[dgl.NID].cpu().long()][:, -1, :].to(args.device)
                 cumul_G_structural_combined_emb = model.combiner(cumul_G_structural_static_emb, cumul_G_structural_dynamic_emb, cumul_G)
                 structural_dynamic_relation_emb = dynamic_relation_emb.structural[:, -1, :, :].to(args.device)  # [:, -1, :, :] to retrieve last hidden from rnn
                 # Encoded embeddings for node
@@ -208,8 +208,8 @@ def eval_link_prediction(model: DynamicGraphModel, batch_G, cumul_G, entire_G, s
             """Compute inter-event time likelihood"""
             edges_time_log_prob = torch.empty(len(eval_eid), entire_G.num_nodes()).fill_(-1e20).cpu()  # shape=(# edges in cumul_G & belonging to eval_times, # node in the entire graph)
             if args.eval in ['time', 'both']:
-                cumul_G_temporal_static_emb = static_entity_emb.temporal[cumul_G.ndata[dgl.NID].long()].to(args.device)
-                cumul_G_temporal_dynamic_emb = dynamic_entity_emb.temporal[cumul_G.ndata[dgl.NID].long()][:, -1, :, :].to(args.device)
+                cumul_G_temporal_static_emb = static_entity_emb.temporal[cumul_G.ndata[dgl.NID].cpu().long()].to(args.device)
+                cumul_G_temporal_dynamic_emb = dynamic_entity_emb.temporal[cumul_G.ndata[dgl.NID].cpu().long()][:, -1, :, :].to(args.device)
                 temporal_dynamic_relation_emb = dynamic_relation_emb.temporal[:, -1, :, :].to(args.device)  # [:, -1, :, :] to retrieve last hidden from rnn
 
                 time_log_prob_eval_dict = \
@@ -271,8 +271,8 @@ def eval_time_prediction(model, batch_G, static_entity_emb, dynamic_entity_emb, 
     model.eval()
 
     with torch.no_grad():
-        batch_G_temporal_static_emb = static_entity_emb.temporal[batch_G.ndata[dgl.NID].long()].to(args.device)
-        batch_G_temporal_dynamic_emb = dynamic_entity_emb.temporal[batch_G.ndata[dgl.NID].long()][:, -1, :, :].to(args.device)
+        batch_G_temporal_static_emb = static_entity_emb.temporal[batch_G.ndata[dgl.NID].cpu().long()].to(args.device)
+        batch_G_temporal_dynamic_emb = dynamic_entity_emb.temporal[batch_G.ndata[dgl.NID].cpu().long()][:, -1, :, :].to(args.device)
         temporal_dynamic_relation_emb = dynamic_relation_emb.temporal[:, -1, :, :].to(args.device)  # [:, -1, :, :] to retrieve last hidden from rnn
 
         expected_event_time = model.inter_event_time_model.expected_event_time(
@@ -366,7 +366,7 @@ def eval_static_link_prediction(model, entire_G, static_entity_emb, eval_times, 
         with entire_G.local_scope():
             # Compute edge likelihood
             edges_target_entity_log_prob = torch.empty(len(eval_eid), entire_G.num_nodes()).fill_(-1e20).cpu()
-            entire_G_static_emb = static_entity_emb[entire_G.ndata[dgl.NID].long()].to(args.device)
+            entire_G_static_emb = static_entity_emb[entire_G.ndata[dgl.NID].cpu().long()].to(args.device)
             # Encoded embeddings for node
             entire_G.ndata['emb'] = entire_G_static_emb
 
@@ -523,7 +523,7 @@ def compute_loss(model, loss, batch_G, static_entity_emb, dynamic_entity_emb, dy
     if batch_eid is not None:
         assert len(batch_eid) > 0, batch_eid.shape
         sub_batch_G = dgl.edge_subgraph(batch_G, batch_eid.type(settings.DGL_GRAPH_ID_TYPE), preserve_nodes=False)
-        sub_batch_G.ndata[dgl.NID] = batch_G.ndata[dgl.NID][sub_batch_G.ndata[dgl.NID].long()]  # map nid in sub_batch_G to nid in the full graph
+        sub_batch_G.ndata[dgl.NID] = batch_G.ndata[dgl.NID][sub_batch_G.ndata[dgl.NID].cpu().long()]  # map nid in sub_batch_G to nid in the full graph
         sub_batch_G = sub_batch_G.to(args.device)
 
         batch_eid = None  # this is needed to NOT perform further edge selection in the loss functions below
@@ -535,8 +535,8 @@ def compute_loss(model, loss, batch_G, static_entity_emb, dynamic_entity_emb, dy
     loss_dict = {}
     """Edge loss"""
     if loss in ['edge', 'both']:
-        sub_batch_G_structural_static_entity_emb = static_entity_emb.structural[sub_batch_G.ndata[dgl.NID].long()].to(args.device)
-        sub_batch_G_structural_dynamic_entity_emb = dynamic_entity_emb.structural[sub_batch_G.ndata[dgl.NID].long()][:, -1, :].to(args.device)  # [:, -1, :] to retrieve last hidden from rnn
+        sub_batch_G_structural_static_entity_emb = static_entity_emb.structural[sub_batch_G.ndata[dgl.NID].cpu().long()].to(args.device)
+        sub_batch_G_structural_dynamic_entity_emb = dynamic_entity_emb.structural[sub_batch_G.ndata[dgl.NID].cpu().long()][:, -1, :].to(args.device)  # [:, -1, :] to retrieve last hidden from rnn
         sub_batch_G_combined_emb = model.combiner(sub_batch_G_structural_static_entity_emb,
                                                   sub_batch_G_structural_dynamic_entity_emb,
                                                   sub_batch_G)
@@ -550,8 +550,8 @@ def compute_loss(model, loss, batch_G, static_entity_emb, dynamic_entity_emb, dy
 
     """Inter-event time loss"""
     if loss in ['time', 'both']:
-        sub_batch_G_temporal_static_entity_emb = static_entity_emb.temporal[sub_batch_G.ndata[dgl.NID].long()].to(args.device)
-        sub_batch_G_temporal_dynamic_entity_emb = dynamic_entity_emb.temporal[sub_batch_G.ndata[dgl.NID].long()][:, -1, :, :].to(args.device)  # [:, -1, :, :] to retrieve last hidden from rnn
+        sub_batch_G_temporal_static_entity_emb = static_entity_emb.temporal[sub_batch_G.ndata[dgl.NID].cpu().long()].to(args.device)
+        sub_batch_G_temporal_dynamic_entity_emb = dynamic_entity_emb.temporal[sub_batch_G.ndata[dgl.NID].cpu().long()][:, -1, :, :].to(args.device)  # [:, -1, :, :] to retrieve last hidden from rnn
         temporal_dynamic_relation_emb = dynamic_relation_emb.temporal[:, -1, :, :].to(args.device)  # [:, -1, :, :] to retrieve last hidden from rnn
         inter_event_time_LL = model.inter_event_time_model.log_prob_density(
             sub_batch_G,
