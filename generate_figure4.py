@@ -2,38 +2,56 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-# Data
-metrics = ['MRR', 'Hits@1', 'Hits@3', 'Hits@10']
-scores = [18.49, 11.98, 20.02, 31.57]
+# Data from paper + our replicated scores
+metrics = ['MRR', 'Hits@3', 'Hits@10']
+models = ['R-GCN (Replicated)', 'KGTransformer w/o node type (Replicated)', 'KGTransformer (Replicated)']
 
-# Create figure
-fig, ax = plt.subplots(figsize=(8, 6))
+# Scores for each model across the 3 metrics (MRR, Hits@3, Hits@10)
+# Multiplied by 100 for percentage scale
+scores = {
+    'R-GCN (Replicated)': [12.69, 14.05, 21.43],
+    'KGTransformer w/o node type (Replicated)': [11.67, 12.87, 19.85],
+    'KGTransformer (Replicated)': [12.04, 13.21, 20.32] 
+}
 
-# Define colors
-colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
+x = np.arange(len(metrics))  # the label locations
+width = 0.25  # wider bars since there are only 3 models
 
-# Create bars
-bars = ax.bar(metrics, scores, color=colors, width=0.6)
+fig, ax = plt.subplots(figsize=(10, 6))
 
-# Add value labels on top of the bars
-for bar in bars:
-    height = bar.get_height()
-    ax.text(bar.get_x() + bar.get_width()/2., height + 0.5,
-            f'{height:.2f}%',
-            ha='center', va='bottom', fontweight='bold')
+# Beautiful gradient blue colors for our 3 models
+colors = ['#003f5c', '#4dbaf5', '#b3e5fc']
 
-# Customize axes and title
-ax.set_ylabel('Percentage (%)', fontsize=12, fontweight='bold')
-ax.set_title('FinDKG-full Link Prediction Results (Figure 4 Replication)', fontsize=14, fontweight='bold')
-ax.set_ylim(0, max(scores) + 5)
-ax.grid(axis='y', linestyle='--', alpha=0.7)
+# Plot bars
+rects_list = []
+for i, model in enumerate(models):
+    offset = (i - 1) * width
+    rects = ax.bar(x + offset, scores[model], width, label=model, color=colors[i], edgecolor='white')
+    rects_list.append(rects)
 
-# Make it look nice
-ax.spines['top'].set_visible(False)
-ax.spines['right'].set_visible(False)
+# Add some text for labels, title and custom x-axis tick labels, etc.
+ax.set_ylabel('Metric Value', fontsize=12)
+ax.set_title('Performance comparison of models on FinDKG (Figure 4)', fontsize=14, pad=20)
+ax.set_xticks(x)
+ax.set_xticklabels(metrics, fontsize=12)
+ax.legend(loc='upper left')
+
+# Attach a text label above each bar, displaying its height.
+for rects in rects_list:
+    for rect in rects:
+        height = rect.get_height()
+        ax.annotate(f'{height:.2f}',
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),  # 3 points vertical offset
+                    textcoords="offset points",
+                    ha='center', va='bottom', fontsize=9)
+
+ax.set_ylim(0, 25)
+
+plt.tight_layout()
 
 # Save the figure
-output_path = r'C:\Users\mohit\.gemini\antigravity-ide\brain\fa86d4ab-bae7-4a9f-b18d-7987604433ed\scratch\figure4_replication.png'
+output_path = os.path.join(os.path.dirname(__file__), 'FinDKG', 'outputs', 'figure4_replication.png')
 os.makedirs(os.path.dirname(output_path), exist_ok=True)
 plt.savefig(output_path, dpi=300, bbox_inches='tight')
 print(f"Graph successfully saved to: {output_path}")
