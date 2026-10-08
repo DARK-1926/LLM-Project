@@ -4,28 +4,27 @@ import os
 
 # Data from paper + our replicated scores
 metrics = ['MRR', 'Hits@3', 'Hits@10']
-models = ['R-GCN (Replicated)', 'KGTransformer w/o node type (Replicated)', 'KGTransformer (Replicated)']
+models = ['KGTransformer w/o node type (Replicated)', 'KGTransformer (Replicated)']
 
 # Scores for each model across the 3 metrics (MRR, Hits@3, Hits@10)
 # Multiplied by 100 for percentage scale
 scores = {
-    'R-GCN (Replicated)': [12.69, 14.05, 21.43],
     'KGTransformer w/o node type (Replicated)': [11.67, 12.87, 19.85],
     'KGTransformer (Replicated)': [12.04, 13.21, 20.32] 
 }
 
 x = np.arange(len(metrics))  # the label locations
-width = 0.25  # wider bars since there are only 3 models
+width = 0.35  # wider bars since there are only 2 models
 
 fig, ax = plt.subplots(figsize=(10, 6))
 
-# Beautiful gradient blue colors for our 3 models
-colors = ['#003f5c', '#4dbaf5', '#b3e5fc']
+# Beautiful gradient blue colors for our 2 models
+colors = ['#4dbaf5', '#b3e5fc']
 
 # Plot bars
 rects_list = []
 for i, model in enumerate(models):
-    offset = (i - 1) * width
+    offset = (i - 0.5) * width
     rects = ax.bar(x + offset, scores[model], width, label=model, color=colors[i], edgecolor='white')
     rects_list.append(rects)
 
